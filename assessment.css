@@ -186,3 +186,23 @@ textarea.inp{min-height:130px; resize:vertical; line-height:1.65;}
 
 .err{color:#E5A3A3; font-size:14px; margin-top:12px; display:none;}
 .err.on{display:block;}
+
+/* -- mobile : ajoute en fin de feuille pour gagner dans la cascade -- LAYOUT MOBILE */
+@media(max-width:620px){
+  /* l'etiquette Playtomic en nowrap reduisait la description a une colonne de
+     trois mots : on la renvoie sous le texte. */
+  .opt{flex-wrap:wrap; padding:17px 18px;}
+  .opt .anchor{order:3; width:100%; margin-left:0; padding-left:25px; margin-top:9px; transform:none;}
+  .opt b{font-size:16.5px;}
+  .q{font-size:clamp(25px,7.2vw,33px); max-width:none;}
+  .help{font-size:16px;}
+  .top-in{padding:12px 18px;}
+  .stage{padding-left:18px; padding-right:18px;}
+  .nav{padding:16px 18px 18px;}
+  .next{padding:15px 26px; letter-spacing:.14em;}
+  .row{padding:12px 14px;}
+  .dots{gap:5px;}
+  .row .rn{font-size:15px;}
+  .hint{display:none;}
+  .radar-panel{position:static;}
+}
