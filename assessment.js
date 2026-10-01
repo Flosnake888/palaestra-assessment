@@ -178,6 +178,32 @@ var S = [
 /* -- state -- */
 var A = {ratings:{}};
 var i = 0;
+
+/* Webflow retire les attributs class des elements poses via l'API : la coquille
+   est donc construite ici, pour que le markup et la CSS ne puissent pas diverger.
+   Cote Webflow il suffit d'un <div id="palaestra-assessment"></div> vide. */
+var SHELL =
+  '<header class="top"><div class="top-in">'+
+    '<span class="mark">PALAESTRA</span>'+
+    '<span class="count" id="count">Building your profile</span>'+
+  '</div><div class="rail"><div class="rail-fill" id="rail"></div></div></header>'+
+  '<main class="stage" id="stage"></main>'+
+  '<div class="nav" id="nav"><div class="nav-in">'+
+    '<button class="back" id="back" type="button">Back</button>'+
+    '<span class="hint" id="hint"></span>'+
+    '<button class="next" id="next" type="button">Continue</button>'+
+  '</div></div>';
+
+if(!document.getElementById("stage")){
+  var mount = document.getElementById("palaestra-assessment");
+  if(!mount){
+    mount = document.createElement("div");
+    mount.id = "palaestra-assessment";
+    document.body.appendChild(mount);
+  }
+  mount.innerHTML = SHELL;
+}
+
 var stage = document.getElementById("stage");
 var nextBtn = document.getElementById("next");
 var backBtn = document.getElementById("back");
