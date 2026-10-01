@@ -538,7 +538,10 @@ function syncChrome(s){
   backBtn.style.visibility = i === 0 ? "hidden" : "visible";
   var total = S.length - 2;
   var shown = Math.min(i, total);
-  count.textContent = i === 0 ? "Building your profile" : "Building your profile \u00b7 " + shown + " of " + total;
+  var narrow = window.innerWidth < 620;
+  count.textContent = i === 0
+    ? (narrow ? "" : "Building your profile")
+    : (narrow ? shown + " / " + total : "Building your profile \u00b7 " + shown + " of " + total);
   rail.style.width = (i / (S.length - 1) * 100) + "%";
 
   if(s.kind === "radar"){
