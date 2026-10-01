@@ -28,7 +28,7 @@ input,textarea{font:inherit;color:inherit;}
 .rail{height:2px; background:rgba(201,168,76,.14);}
 .rail-fill{height:100%; width:0%; background:var(--au500); transition:width 420ms cubic-bezier(.22,1,.36,1);}
 
-.stage{max-width:1120px; margin:0 auto; padding:clamp(34px,7vh,72px) 22px clamp(130px,18vh,180px);}
+.stage{max-width:1120px; margin:0 auto; padding:clamp(34px,7vh,72px) 22px calc(var(--navh,96px) + 56px);}
 .step{display:none; animation:rise 460ms cubic-bezier(.22,1,.36,1);}
 .step.on{display:block;}
 @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}

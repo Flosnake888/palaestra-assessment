@@ -212,6 +212,14 @@ var count = document.getElementById("count");
 var hint = document.getElementById("hint");
 var nav = document.getElementById("nav");
 
+/* la barre est en position fixe : on reserve sa hauteur reelle sous le contenu,
+   sinon la derniere ligne passe dessous. Recalcule au redimensionnement, la barre
+   change de hauteur quand elle passe sur deux lignes en mobile. */
+function navHeight(){
+  document.documentElement.style.setProperty("--navh", nav.offsetHeight + "px");
+}
+window.addEventListener("resize", navHeight);
+
 /* -- coach reactions -- */
 function reaction(id){
   var r = A[id];
@@ -463,6 +471,7 @@ function render(){
   stage.appendChild(el);
   wire(s);
   syncChrome(s);
+  navHeight();
   window.scrollTo({top:0,behavior:"instant" in window ? "instant" : "auto"});
 }
 
@@ -634,7 +643,20 @@ function submit(){
       var f = form.querySelector('[name="'+k+'"]');
       if(f) f.value = data[k];
     });
-    if(typeof form.requestSubmit === "function") form.requestSubmit(); else form.submit();
+    /* Webflow redirige apres soumission : sans cible, le joueur est ejecte de son
+       ecran de profil vers la page de remerciement. On envoie donc la reponse dans
+       une iframe cachee, l'ecran final reste a l'ecran. */
+    var sink = document.getElementById("pal-sink");
+    if(!sink){
+      sink = document.createElement("iframe");
+      sink.id = "pal-sink"; sink.name = "pal-sink"; sink.title = "submission";
+      sink.setAttribute("aria-hidden","true"); sink.tabIndex = -1;
+      sink.style.cssText = "position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;border:0;";
+      document.body.appendChild(sink);
+    }
+    form.target = "pal-sink";
+    form.submit();          /* .submit() et non .requestSubmit() : on court-circuite
+                               l'interception AJAX de Webflow, qui ignore target */
     return;
   }
   if(window.PALAESTRA_WEBHOOK){
