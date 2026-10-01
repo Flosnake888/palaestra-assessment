@@ -492,8 +492,14 @@ function ready(s){
   return true;
 }
 
+function setOff(el, off){
+  el.setAttribute("aria-disabled", off ? "true" : "false");
+  if("disabled" in el) el.disabled = off;          /* vrai <button> */
+}
+function isOff(el){ return el.getAttribute("aria-disabled") === "true"; }
+
 function syncChrome(s){
-  nextBtn.disabled = !ready(s);
+  setOff(nextBtn, !ready(s));
   backBtn.style.visibility = i === 0 ? "hidden" : "visible";
   var total = S.length - 2;
   var shown = Math.min(i, total);
@@ -613,16 +619,20 @@ function submit(){
 }
 
 /* -- nav -- */
-nextBtn.addEventListener("click", function(){
-  if(nextBtn.disabled) return;
+nextBtn.addEventListener("click", function(e){
+  e.preventDefault();                               /* Webflow en fait un <a> */
+  if(isOff(nextBtn)) return;
   if(i < S.length - 1){ i++; render(); }
 });
-backBtn.addEventListener("click", function(){ if(i > 0){ i--; render(); } });
+backBtn.addEventListener("click", function(e){
+  e.preventDefault();
+  if(i > 0){ i--; render(); }
+});
 document.addEventListener("keydown", function(e){
   if(e.key === "Enter" && !e.shiftKey){
     var t = e.target.tagName;
     if(t === "TEXTAREA") return;
-    if(!nextBtn.disabled && nav.style.display !== "none"){ e.preventDefault(); nextBtn.click(); }
+    if(!isOff(nextBtn) && nav.style.display !== "none"){ e.preventDefault(); nextBtn.click(); }
   }
 });
 
