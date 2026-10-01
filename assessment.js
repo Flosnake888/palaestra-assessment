@@ -334,7 +334,7 @@ function render(){
       '<h1 class="q" style="max-width:25ch">Six minutes, and the week starts being built around you.</h1>'+
       '<p class="help">This is what your coach reads before you arrive. It is how the drills, the pairings and your plan get built around your game instead of around the group average. Think of it as your passport to the coach on court.</p>'+
       '<p class="help">You also set your week here: which camp, who you are coming with, and whether you want us to handle where you stay.</p>'+
-      '<p class="help">Florent reads every one of these himself and writes back within 24 hours with your Blueprint, your plan for the next ninety days: the three priorities for the next ninety days, the drills to work them at your own club, and the one thing you will not fix on your own.</p>'+
+      '<p class="help">Florent reads every one of these himself and writes back within 24 hours with your Blueprint: your three priorities for the next ninety days, the drills to work them at your own club, and the one thing you will not fix on your own.</p>'+
       '<p class="help" style="color:var(--au200)">You keep it whether or not you ever train with us.</p>';
     nextBtn.textContent = "Start";
   } else if(s.kind === "one"){

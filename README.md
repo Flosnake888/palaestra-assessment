@@ -15,9 +15,8 @@ et `blueprint-SAMPLE-daniel-rahman.html`, puis recopier.
 ## Servir
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh<!--
--->/FLORENT/palaestra-assessment@v1/assessment.css">
-<script src="https://cdn.jsdelivr.net/gh/FLORENT/palaestra-assessment@v1/assessment.js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Flosnake888/palaestra-assessment@v1/assessment.css">
+<script src="https://cdn.jsdelivr.net/gh/Flosnake888/palaestra-assessment@v1/assessment.js" defer></script>
 ```
 
 **Toujours épingler un tag** (`@v1`, `@v2`...), jamais `@main` : jsDelivr met une branche
