@@ -640,26 +640,34 @@ function score(){
 function submit(){
   var data = payload();
   if(window.console) console.log("[assessment] payload", data);
-  var form = document.getElementById("wf-assessment");   /* form Webflow cache */
-  if(form){
-    Object.keys(data).forEach(function(k){
-      var f = form.querySelector('[name="'+k+'"]');
-      if(f) f.value = data[k];
+  var form = document.getElementById("wf-assessment");
+  var site = document.documentElement.getAttribute("data-wf-site");
+  if(form && site){
+    /* On poste directement sur l'endpoint de formulaire de Webflow, exactement comme
+       le fait webflow.js. Deux raisons : un form.submit() natif court-circuite le JS
+       de Webflow et la reponse n'est jamais enregistree (bug v5 a v7), et un
+       requestSubmit() laisse Webflow rediriger le joueur hors de son ecran de profil. */
+    var body = [];
+    function add(k, v){ body.push(encodeURIComponent(k) + "=" + encodeURIComponent(v == null ? "" : v)); }
+    add("name", form.getAttribute("data-name") || form.getAttribute("name") || "Player Assessment");
+    add("pageId", form.getAttribute("data-wf-page-id") || "");
+    add("elementId", form.getAttribute("data-wf-element-id") || "");
+    add("source", location.href);
+    add("test", "false");
+    add("dolphin", "false");
+    Object.keys(data).forEach(function(k){ add("fields[" + k + "]", data[k]); });
+    fetch("https://webflow.com/api/v1/form/" + site, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Accept": "application/json, text/javascript, */*; q=0.01"
+      },
+      body: body.join("&")
+    }).then(function(r){
+      if(window.console) console.log("[assessment] webflow " + r.status);
+    }).catch(function(e){
+      if(window.console) console.warn("[assessment] webflow KO", e);
     });
-    /* Webflow redirige apres soumission : sans cible, le joueur est ejecte de son
-       ecran de profil vers la page de remerciement. On envoie donc la reponse dans
-       une iframe cachee, l'ecran final reste a l'ecran. */
-    var sink = document.getElementById("pal-sink");
-    if(!sink){
-      sink = document.createElement("iframe");
-      sink.id = "pal-sink"; sink.name = "pal-sink"; sink.title = "submission";
-      sink.setAttribute("aria-hidden","true"); sink.tabIndex = -1;
-      sink.style.cssText = "position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;border:0;";
-      document.body.appendChild(sink);
-    }
-    form.target = "pal-sink";
-    form.submit();          /* .submit() et non .requestSubmit() : on court-circuite
-                               l'interception AJAX de Webflow, qui ignore target */
     return;
   }
   if(window.PALAESTRA_WEBHOOK){
