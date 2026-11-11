@@ -134,12 +134,16 @@ var S = [
    label:"Injuries, surgery, limitations", ph:"None", area:false, optional:true},
 
   {id:"camp", kind:"one", eyebrow:"Your week", q:"Which week could you actually make?",
-   help:"One cohort at a time, nine players maximum, selected by level. If neither date works, say so and I will tell you what is opening next.",
+   help:"One cohort at a time, nine players maximum, grouped by level. No payment until your week is confirmed.",
    opts:[
-    {v:"dubai", b:"Dubai, 18 to 22 November 2026", s:"Five days at Padel One. Breakfast and lunch at the club."},
-    {v:"samui", b:"Koh Samui, 14 to 20 December 2026", s:"Seven days at Padel Tropical Club."},
-    {v:"both", b:"Either could work", s:"Tell me which one fits my game better."},
-    {v:"later", b:"Neither. Tell me about the next ones."},
+    {v:"dubai", b:"Dubai, 25 to 29 January 2027", s:"Five days. \u20ac2,300."},
+    {v:"bali", b:"Bali, 21 to 28 February 2027", s:"Seven days. \u20ac2,500."},
+    {v:"samui", b:"Koh Samui, 11 to 17 March 2027", s:"Seven days. \u20ac2,500."},
+    {v:"phuket", b:"Phuket, 4 to 10 April 2027", s:"Seven days. \u20ac2,500."},
+    {v:"miami", b:"Miami, 12 to 16 April 2027", s:"Five days. $3,990."},
+    {v:"bangkok", b:"Bangkok, 13 to 17 May 2027", s:"Five days. \u20ac2,300."},
+    {v:"danang", b:"Da Nang, 14 to 20 June 2027", s:"Seven days. \u20ac2,500."},
+    {v:"both", b:"Not sure yet", s:"Tell me which week fits my game better."},
     {v:"private", b:"I would rather have my own dates", s:"A private week for me and my group."}
    ]},
 
@@ -161,7 +165,7 @@ var S = [
     {v:"undecided", b:"Not sure yet, talk me through it on the call"}
    ]},
 
-  {id:"budget", kind:"one", eyebrow:"Your week", q:"A Palaestra week is 2 300 to 2 500 euros.",
+  {id:"budget", kind:"one", eyebrow:"Your week", q:"A Palaestra week is 2 300 to 2 500 euros (Miami 3 990 dollars).",
    help:"Coaching, courts, video and recovery included. Flights and accommodation are on you. No hidden extras, and we never discount to fill a seat.",
    opts:[
     {v:"yes", b:"Yes, that works"},
@@ -178,6 +182,32 @@ var S = [
 /* -- state -- */
 var A = {ratings:{}};
 var i = 0;
+/* v9 : pre-remplissage depuis le formulaire du site (localStorage pal_lead) ou l'URL (?fn=&ln=&em=&ph=&week=) */
+(function(){
+  var L = {};
+  try{ L = JSON.parse(localStorage.getItem("pal_lead")) || {}; }catch(e){}
+  try{ var q = new URLSearchParams(location.search); ["fn","ln","em","ph","week"].forEach(function(k){ if(q.get(k)) L[k] = q.get(k); }); }catch(e){}
+  ["fn","ln","em","ph"].forEach(function(k){ if(L[k]) A[k] = String(L[k]).trim(); });
+  var w = String(L.week || "").toLowerCase(), m = null;
+  [["dubai","dubai"],["bali","bali"],["samui","samui"],["phuket","phuket"],["miami","miami"],["bangkok","bangkok"],["nang","danang"],["private","private"],["own dates","private"]]
+    .forEach(function(p){ if(!m && w.indexOf(p[0]) >= 0) m = p[1]; });
+  if(m && !/2026/.test(w)) A.camp = m;
+})();
+function track(name, extra){
+  var d = {content_name:"assessment", camp:A.camp||"", tier:A._tier||""};
+  for(var k in (extra||{})) d[k] = extra[k];
+  try{ if(window.fbq) window.fbq("track", name, d); }catch(e){}
+  try{ if(window.gtag) window.gtag("event", name === "SubmitApplication" ? "assessment_complete" : "call_click", d); }catch(e){}
+  try{ (window.dataLayer = window.dataLayer || []).push({event: name === "SubmitApplication" ? "assessment_complete" : "call_click", camp:d.camp, tier:d.tier}); }catch(e){}
+}
+function calUrl(){
+  var u = "https://calendly.com/contact-palaestra/30min", q = [];
+  var n = [A.fn, A.ln].filter(Boolean).join(" ");
+  if(n) q.push("name=" + encodeURIComponent(n));
+  if(A.em) q.push("email=" + encodeURIComponent(A.em));
+  q.push("utm_source=assessment");
+  return u + "?" + q.join("&");
+}
 
 /* Webflow retire les attributs class des elements poses via l'API : la coquille
    est donc construite ici, pour que le markup et la CSS ne puissent pas diverger.
@@ -241,7 +271,8 @@ function reaction(id){
   }
   if(id === "camp"){
     if(r === "dubai") return "Four to five hours of flying for most of Asia and the Gulf, no visa to plan. It is the easiest week of the year to actually make.";
-    if(r === "samui") return "Seven days is the full format. More court time, and the group has time to become a group.";
+    if(r === "samui" || r === "bali" || r === "phuket" || r === "danang") return "Seven days is the full format. More court time, and the group has time to become a group.";
+    if(r === "both") return "Fine. Once I have seen your game, I will tell you which week fits it best.";
     if(r === "private") return "Then the format changes: your dates, your group, the courts to ourselves. I will price it properly on the call.";
     if(r === "later") return "Noted. I will tell you what is opening next rather than push you onto a date that does not work.";
   }
@@ -340,8 +371,9 @@ function drawRadar(){
 }
 
 function recapHTML(){
-  var camp = {dubai:"Dubai, 18 to 22 November", samui:"Koh Samui, 14 to 20 December",
-              both:"Dubai or Koh Samui, to be decided", later:"A later cohort",
+  var camp = {dubai:"Dubai, 25 to 29 January 2027", bali:"Bali, 21 to 28 February 2027", samui:"Koh Samui, 11 to 17 March 2027",
+              phuket:"Phuket, 4 to 10 April 2027", miami:"Miami, 12 to 16 April 2027", bangkok:"Bangkok, 13 to 17 May 2027",
+              danang:"Da Nang, 14 to 20 June 2027", both:"Your week, to be decided together", later:"A later cohort",
               private:"A private week on your own dates"}[A.camp];
   var who  = {solo:"On your own", pair:"With your partner", group:"With your group",
               unsure:"Solo for now"}[A.who];
@@ -455,7 +487,7 @@ function render(){
       '<div class="v-cta">'+
         recapHTML()+
         '<p>That is the short version. Your full Blueprint, with your three priorities, the drills to work them and the part you will not fix on your own, lands in your inbox within 24 hours.</p>'+
-        '<a class="sent" href="https://calendly.com/contact-palaestra/30min">Book your 30 minutes</a>'+
+        '<a class="sent" id="calCta" href="'+esc(calUrl())+'">Book your 30 minutes</a>'+
         '<p class="v-foot">We go through your Blueprint together. There is no pitch in that call.</p>'+
       '</div>';
     nav.style.display = "none";
@@ -464,6 +496,8 @@ function render(){
     stage.appendChild(el);
     drawRadar();
     submit();
+    var cc = document.getElementById("calCta");
+    if(cc) cc.addEventListener("click", function(){ track("Schedule"); });
     window.scrollTo({top:0,behavior:"smooth"});
     return;
   }
@@ -597,12 +631,13 @@ function coachBrief(){
     label({none:"No tournaments",few:"A few local",occ:"Occasional",reg:"Regular",results:"Regular, with results",national:"National level"},A.tourn)].filter(Boolean).join("  .  "));
   lines.push("");
   lines.push("-- HIS WEEK --");
-  lines.push([label({dubai:"Dubai 18-22 Nov",samui:"Koh Samui 14-20 Dec",both:"Dubai or Samui",
+  lines.push([label({dubai:"Dubai 25-29 Jan 27",bali:"Bali 21-28 Feb 27",samui:"Koh Samui 11-17 Mar 27",phuket:"Phuket 4-10 Apr 27",
+    miami:"Miami 12-16 Apr 27",bangkok:"Bangkok 13-17 May 27",danang:"Da Nang 14-20 Jun 27",both:"Week not chosen yet",
     later:"A later cohort",private:"Private, own dates"},A.camp),
     label({solo:"On his own",pair:"With a partner",group:"With a group of 3+",unsure:"Undecided"},A.who),
     label({own:"Books his own stay",reco:"Wants our recommendation",handled:"Wants us to handle the stay",
       undecided:"Stay to discuss"},A.stay)].join("  .  "));
-  lines.push("Budget 2300-2500: "+label({yes:"YES",maybe:"yes if the plan convinces him",no:"NOT THIS YEAR"},A.budget));
+  lines.push("Budget 2300-2500 (Miami $3990): "+label({yes:"YES",maybe:"yes if the plan convinces him",no:"NOT THIS YEAR"},A.budget));
   lines.push("");
   lines.push("-- WEAKEST --  "+low.map(L).join("  .  "));
   lines.push("-- STRONGEST -- "+high.map(L).join("  .  "));
@@ -639,6 +674,10 @@ function score(){
 }
 function submit(){
   var data = payload();
+  try{ var at = JSON.parse(sessionStorage.getItem("pal_attr")) || {};
+       ["utm_source","utm_campaign","utm_content","landing_page"].forEach(function(k){ if(at[k] && !data[k]) data[k] = at[k]; }); }catch(e){}
+  A._tier = data.assessment_tier || "";
+  track("SubmitApplication", {value: data.assessment_tier === "A" ? 3 : data.assessment_tier === "B" ? 2 : 1, currency: "EUR"});
   if(window.console) console.log("[assessment] payload", data);
   var form = document.getElementById("wf-assessment");
   var site = document.documentElement.getAttribute("data-wf-site");
